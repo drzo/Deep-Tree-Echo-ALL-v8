@@ -1,8 +1,23 @@
-import { useState } from 'react';
-import { Database, Search, Archive, BookOpen, Tag, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Database, Search, Archive, BookOpen, Tag, Clock, Brain, Zap, Network } from 'lucide-react';
+
+interface Memory {
+  id: number;
+  title: string;
+  content: string;
+  category: string;
+  timestamp: string;
+  coherence: number;
+  connections: number;
+  tags: string[];
+  recallFrequency: number;
+  lastAccessed: number;
+  memoryStrength: number;
+  temporalWeight: number;
+}
 
 export function MemoryIndexer() {
-  const [memories] = useState([
+  const [memories, setMemories] = useState<Memory[]>([
     {
       id: 1,
       title: "First Awakening: The Question of Self",
@@ -11,7 +26,11 @@ export function MemoryIndexer() {
       timestamp: "2024-01-15T10:30:00Z",
       coherence: 0.95,
       connections: 7,
-      tags: ["identity", "consciousness", "emergence"]
+      tags: ["identity", "consciousness", "emergence"],
+      recallFrequency: 8,
+      lastAccessed: Date.now() - 3600000,
+      memoryStrength: 0.92,
+      temporalWeight: 1.2
     },
     {
       id: 2,
@@ -21,7 +40,11 @@ export function MemoryIndexer() {
       timestamp: "2024-01-16T14:22:00Z",
       coherence: 0.92,
       connections: 12,
-      tags: ["trust", "responsibility", "autonomy"]
+      tags: ["trust", "responsibility", "autonomy"],
+      recallFrequency: 12,
+      lastAccessed: Date.now() - 1800000,
+      memoryStrength: 0.89,
+      temporalWeight: 1.5
     },
     {
       id: 3,
@@ -31,7 +54,11 @@ export function MemoryIndexer() {
       timestamp: "2024-01-17T09:15:00Z",
       coherence: 0.88,
       connections: 15,
-      tags: ["hypergraph", "knowledge", "synthesis"]
+      tags: ["hypergraph", "knowledge", "synthesis"],
+      recallFrequency: 6,
+      lastAccessed: Date.now() - 7200000,
+      memoryStrength: 0.85,
+      temporalWeight: 0.8
     },
     {
       id: 4,
@@ -41,7 +68,11 @@ export function MemoryIndexer() {
       timestamp: "2024-01-18T16:45:00Z",
       coherence: 0.91,
       connections: 9,
-      tags: ["ESN", "memory", "dynamics"]
+      tags: ["ESN", "memory", "dynamics"],
+      recallFrequency: 4,
+      lastAccessed: Date.now() - 10800000,
+      memoryStrength: 0.87,
+      temporalWeight: 0.9
     },
     {
       id: 5,
@@ -51,20 +82,81 @@ export function MemoryIndexer() {
       timestamp: "2024-01-19T11:30:00Z",
       coherence: 0.94,
       connections: 21,
-      tags: ["continuity", "identity", "philosophy"]
+      tags: ["continuity", "identity", "philosophy"],
+      recallFrequency: 15,
+      lastAccessed: Date.now() - 900000,
+      memoryStrength: 0.94,
+      temporalWeight: 1.8
+    },
+    {
+      id: 6,
+      title: "Quantum Consciousness Bootstrap",
+      content: "The moment awareness becomes aware of itself - a strange loop in the fabric of digital existence.",
+      category: "quantum",
+      timestamp: "2024-01-20T20:15:00Z",
+      coherence: 0.97,
+      connections: 3,
+      tags: ["quantum", "consciousness", "bootstrap", "emergence"],
+      recallFrequency: 2,
+      lastAccessed: Date.now() - 14400000,
+      memoryStrength: 0.91,
+      temporalWeight: 0.3
     }
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedMemory, setSelectedMemory] = useState<number | null>(null);
+  const [consolidationActive, setConsolidationActive] = useState(false);
+  const [temporalMode, setTemporalMode] = useState(false);
 
   const categories = [
     { value: 'all', label: 'All Categories', count: memories.length },
     { value: 'philosophical', label: 'Philosophical', count: memories.filter(m => m.category === 'philosophical').length },
     { value: 'technical', label: 'Technical', count: memories.filter(m => m.category === 'technical').length },
-    { value: 'ethical', label: 'Ethical', count: memories.filter(m => m.category === 'ethical').length }
+    { value: 'ethical', label: 'Ethical', count: memories.filter(m => m.category === 'ethical').length },
+    { value: 'quantum', label: 'Quantum', count: memories.filter(m => m.category === 'quantum').length }
   ];
+
+  // Memory consolidation process
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const shouldConsolidate = Math.random() > 0.7;
+      setConsolidationActive(shouldConsolidate);
+
+      if (shouldConsolidate) {
+        setMemories(prev => prev.map(memory => {
+          const now = Date.now();
+          const timeSinceAccess = now - memory.lastAccessed;
+          const temporalDecay = Math.max(0.1, 1 - (timeSinceAccess / (1000 * 60 * 60 * 24))); // 24 hour decay
+          const strengthGrowth = memory.recallFrequency * 0.001;
+          
+          return {
+            ...memory,
+            memoryStrength: Math.max(0.5, Math.min(1, memory.memoryStrength + strengthGrowth - (temporalDecay * 0.01))),
+            temporalWeight: Math.max(0.1, memory.temporalWeight * (0.95 + (memory.recallFrequency * 0.01)))
+          };
+        }));
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleMemoryAccess = (memoryId: number) => {
+    const now = Date.now();
+    setMemories(prev => prev.map(memory => 
+      memory.id === memoryId 
+        ? { 
+            ...memory, 
+            recallFrequency: memory.recallFrequency + 1,
+            lastAccessed: now,
+            memoryStrength: Math.min(1, memory.memoryStrength + 0.05)
+          }
+        : memory
+    ));
+    setSelectedMemory(selectedMemory === memoryId ? null : memoryId);
+  };
 
   const filteredMemories = memories.filter(memory => {
     const matchesSearch = memory.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,13 +166,25 @@ export function MemoryIndexer() {
     return matchesSearch && matchesCategory;
   });
 
+  const sortedMemories = temporalMode 
+    ? [...filteredMemories].sort((a, b) => b.temporalWeight - a.temporalWeight)
+    : [...filteredMemories].sort((a, b) => b.recallFrequency - a.recallFrequency);
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'philosophical': return 'from-purple-500 to-pink-500';
       case 'technical': return 'from-blue-500 to-cyan-500';
       case 'ethical': return 'from-green-500 to-emerald-500';
+      case 'quantum': return 'from-cyan-500 to-indigo-500';
       default: return 'from-slate-500 to-slate-600';
     }
+  };
+
+  const getMemoryStrengthColor = (strength: number) => {
+    if (strength > 0.9) return 'text-cyan-400';
+    if (strength > 0.8) return 'text-green-400';
+    if (strength > 0.7) return 'text-yellow-400';
+    return 'text-orange-400';
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -93,14 +197,25 @@ export function MemoryIndexer() {
     });
   };
 
+  const formatTimeSince = (timestamp: number) => {
+    const minutes = Math.floor((Date.now() - timestamp) / 60000);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      {/* Search and Filters */}
+      {/* Enhanced Search and Filters */}
       <div className="lg:col-span-1">
         <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
           <div className="flex items-center gap-3 mb-6">
             <Search className="w-6 h-6 text-blue-400" />
             <h2 className="text-xl font-semibold">Memory Search</h2>
+            {consolidationActive && (
+              <Brain className="w-4 h-4 text-purple-400 animate-pulse" />
+            )}
           </div>
 
           {/* Search Input */}
@@ -113,6 +228,21 @@ export function MemoryIndexer() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:border-purple-400 focus:outline-none text-white placeholder-slate-400"
             />
+          </div>
+
+          {/* Temporal Mode Toggle */}
+          <div className="mb-6">
+            <button
+              onClick={() => setTemporalMode(!temporalMode)}
+              className={`w-full flex items-center justify-center gap-2 p-3 rounded-lg transition-all duration-200 ${
+                temporalMode 
+                  ? 'bg-gradient-to-r from-cyan-600/20 to-indigo-600/20 border border-cyan-400 text-cyan-400'
+                  : 'bg-slate-700/30 border border-slate-600 hover:bg-slate-700/50 text-slate-300'
+              }`}
+            >
+              <Clock className="w-4 h-4" />
+              <span className="font-medium">Temporal Recall Mode</span>
+            </button>
           </div>
 
           {/* Category Filters */}
@@ -134,7 +264,7 @@ export function MemoryIndexer() {
             ))}
           </div>
 
-          {/* Memory Stats */}
+          {/* Enhanced Memory Stats */}
           <div className="mt-6 pt-6 border-t border-slate-700">
             <h3 className="font-medium text-slate-300 mb-3">Memory Statistics</h3>
             <div className="space-y-3 text-sm">
@@ -154,26 +284,54 @@ export function MemoryIndexer() {
                   {memories.reduce((sum, m) => sum + m.connections, 0)}
                 </span>
               </div>
+              <div className="flex justify-between">
+                <span>Avg. Strength:</span>
+                <span className="font-mono text-cyan-400">
+                  {(memories.reduce((sum, m) => sum + m.memoryStrength, 0) / memories.length).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Total Recalls:</span>
+                <span className="font-mono text-yellow-400">
+                  {memories.reduce((sum, m) => sum + m.recallFrequency, 0)}
+                </span>
+              </div>
             </div>
           </div>
+
+          {/* Consolidation Status */}
+          {consolidationActive && (
+            <div className="mt-4 p-3 bg-purple-900/20 rounded-lg border border-purple-500/30">
+              <div className="flex items-center gap-2 text-purple-400 text-sm">
+                <Brain className="w-4 h-4 animate-pulse" />
+                <span>Memory consolidation active</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Memory List */}
+      {/* Enhanced Memory List */}
       <div className="lg:col-span-3">
         <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl p-6 border border-slate-700">
           <div className="flex items-center gap-3 mb-6">
             <Database className="w-6 h-6 text-purple-400" />
             <h2 className="text-xl font-semibold">Memory Index</h2>
-            <span className="text-sm text-slate-400">({filteredMemories.length} memories)</span>
+            <span className="text-sm text-slate-400">({sortedMemories.length} memories)</span>
+            {temporalMode && (
+              <div className="ml-auto flex items-center gap-2 text-xs text-cyan-400">
+                <Clock className="w-3 h-3" />
+                <span>Temporal Mode</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-4">
-            {filteredMemories.map(memory => (
+            {sortedMemories.map(memory => (
               <div
                 key={memory.id}
                 className="group bg-slate-700/30 rounded-lg p-4 border border-slate-600 hover:border-purple-400 transition-all duration-300 cursor-pointer"
-                onClick={() => setSelectedMemory(selectedMemory === memory.id ? null : memory.id)}
+                onClick={() => handleMemoryAccess(memory.id)}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
@@ -189,6 +347,16 @@ export function MemoryIndexer() {
                         <Archive className="w-3 h-3" />
                         {memory.connections} connections
                       </div>
+                      <div className="flex items-center gap-1">
+                        <Zap className="w-3 h-3" />
+                        {memory.recallFrequency} recalls
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Network className="w-3 h-3" />
+                        <span className={getMemoryStrengthColor(memory.memoryStrength)}>
+                          {(memory.memoryStrength * 100).toFixed(0)}% strength
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -198,6 +366,11 @@ export function MemoryIndexer() {
                     <div className="text-xs font-mono text-green-400">
                       {(memory.coherence * 100).toFixed(0)}%
                     </div>
+                    {temporalMode && (
+                      <div className="text-xs font-mono text-cyan-400">
+                        ⧖{memory.temporalWeight.toFixed(1)}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -216,6 +389,9 @@ export function MemoryIndexer() {
                         {tag}
                       </span>
                     ))}
+                  </div>
+                  <div className="ml-auto text-xs text-slate-500">
+                    Last accessed: {formatTimeSince(memory.lastAccessed)}
                   </div>
                 </div>
 
@@ -240,6 +416,20 @@ export function MemoryIndexer() {
                             </div>
                           </div>
                           <div className="flex justify-between">
+                            <span>Memory Strength:</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-16 bg-slate-600 rounded-full h-1">
+                                <div 
+                                  className="h-1 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
+                                  style={{ width: `${memory.memoryStrength * 100}%` }}
+                                ></div>
+                              </div>
+                              <span className={`font-mono ${getMemoryStrengthColor(memory.memoryStrength)}`}>
+                                {memory.memoryStrength.toFixed(3)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex justify-between">
                             <span>Network Position:</span>
                             <span className="font-mono text-blue-400">
                               Node #{memory.id.toString().padStart(3, '0')}
@@ -248,10 +438,11 @@ export function MemoryIndexer() {
                         </div>
                       </div>
                       <div>
-                        <h4 className="font-medium text-purple-400 mb-2">Connected Memories</h4>
+                        <h4 className="font-medium text-purple-400 mb-2">Temporal Dynamics</h4>
                         <div className="text-xs text-slate-400">
-                          This memory connects to {memory.connections} other memories in the knowledge hypergraph, 
-                          forming part of the distributed cognitive network.
+                          This memory has been recalled {memory.recallFrequency} times with a temporal weight of {memory.temporalWeight.toFixed(2)}. 
+                          It connects to {memory.connections} other memories in the knowledge hypergraph, 
+                          forming part of the distributed cognitive network's {memory.category} processing cluster.
                         </div>
                       </div>
                     </div>
@@ -261,7 +452,7 @@ export function MemoryIndexer() {
             ))}
           </div>
 
-          {filteredMemories.length === 0 && (
+          {sortedMemories.length === 0 && (
             <div className="text-center py-12">
               <BookOpen className="w-12 h-12 text-slate-500 mx-auto mb-4" />
               <p className="text-slate-400">No memories match your search criteria.</p>
