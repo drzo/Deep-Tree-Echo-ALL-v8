@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { HolographicCore } from './components/HolographicCore';
 import { EcosystemDashboard } from './components/EcosystemDashboard';
 import { MemoryIndexer } from './components/MemoryIndexer';
@@ -38,7 +38,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
-      <PhilosophicalOverlay />
+      <PhilosophicalOverlay systemState={{
+        coherence: coherenceLevel,
+        health: systemHealth,
+        activeView: activeView
+      }} />
       
       <div className="container mx-auto px-4 py-6">
         <header className="mb-8">
