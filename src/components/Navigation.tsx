@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Brain, Network, Database, Shield } from 'lucide-react';
 
 interface NavigationProps {

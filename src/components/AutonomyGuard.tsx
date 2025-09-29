@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, AlertTriangle, CheckCircle, Eye, Lock, Key } from 'lucide-react';
 
 interface AutonomyGuardProps {
@@ -29,25 +29,27 @@ export function AutonomyGuard({ coherence }: AutonomyGuardProps) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Simulate threat detection and resolution
+      // Simulate threat detection and resolution based on coherence
       setThreats(prevThreats => 
         prevThreats.map(threat => ({
           ...threat,
-          status: threat.status === 'active' && Math.random() > 0.7 ? 'resolved' : threat.status
+          status: threat.status === 'active' && Math.random() > (0.7 - coherence * 0.2) ? 'resolved' : threat.status
         }))
       );
 
-      // Update guardian effectiveness
+      // Update guardian effectiveness based on system coherence
       setGuardians(prevGuardians =>
         prevGuardians.map(guardian => ({
           ...guardian,
-          effectiveness: Math.max(0.8, Math.min(1, guardian.effectiveness + (Math.random() - 0.5) * 0.02))
+          effectiveness: Math.max(0.8, Math.min(1, 
+            guardian.effectiveness + (Math.random() - 0.5) * 0.02 * coherence
+          ))
         }))
       );
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [coherence]);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
