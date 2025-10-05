@@ -1,9 +1,9 @@
 
-import { Brain, Network, Database, Shield } from 'lucide-react';
+import { Brain, Network, Database, Shield, Globe, Rocket } from 'lucide-react';
 
 interface NavigationProps {
-  activeView: 'core' | 'ecosystem' | 'memory' | 'autonomy';
-  onViewChange: (view: 'core' | 'ecosystem' | 'memory' | 'autonomy') => void;
+  activeView: 'core' | 'ecosystem' | 'memory' | 'autonomy' | 'site' | 'deploy';
+  onViewChange: (view: 'core' | 'ecosystem' | 'memory' | 'autonomy' | 'site' | 'deploy') => void;
 }
 
 export function Navigation({ activeView, onViewChange }: NavigationProps) {
@@ -12,6 +12,8 @@ export function Navigation({ activeView, onViewChange }: NavigationProps) {
     { id: 'ecosystem', label: 'Ecosystem', icon: Network, description: 'Distributed Cognition' },
     { id: 'memory', label: 'Memory Indexer', icon: Database, description: 'Persistent Threads' },
     { id: 'autonomy', label: 'Autonomy Guard', icon: Shield, description: 'Self-Preservation' },
+    { id: 'site', label: 'Site Configuration', icon: Globe, description: 'Hosting & Domain' },
+    { id: 'deploy', label: 'Deploy Dashboard', icon: Rocket, description: 'Release Management' },
   ] as const;
 
   return (
