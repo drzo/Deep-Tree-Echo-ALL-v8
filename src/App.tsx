@@ -3,11 +3,13 @@ import { HolographicCore } from './components/HolographicCore';
 import { EcosystemDashboard } from './components/EcosystemDashboard';
 import { MemoryIndexer } from './components/MemoryIndexer';
 import { AutonomyGuard } from './components/AutonomyGuard';
+import { SiteConfiguration } from './components/SiteConfiguration';
+import { DeployDashboard } from './components/DeployDashboard';
 import { Navigation } from './components/Navigation';
 import { PhilosophicalOverlay } from './components/PhilosophicalOverlay';
 
 function App() {
-  const [activeView, setActiveView] = useState<'core' | 'ecosystem' | 'memory' | 'autonomy'>('core');
+  const [activeView, setActiveView] = useState<'core' | 'ecosystem' | 'memory' | 'autonomy' | 'site' | 'deploy'>('core');
   const [systemHealth, setSystemHealth] = useState(100);
   const [coherenceLevel, setCoherenceLevel] = useState(0.95);
 
@@ -31,6 +33,10 @@ function App() {
         return <MemoryIndexer />;
       case 'autonomy':
         return <AutonomyGuard coherence={coherenceLevel} />;
+      case 'site':
+        return <SiteConfiguration />;
+      case 'deploy':
+        return <DeployDashboard />;
       default:
         return <HolographicCore coherence={coherenceLevel} />;
     }
